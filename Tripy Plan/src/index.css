@@ -1,0 +1,80 @@
+@import url('https://fonts.googleapis.com/css2?family=Caveat:wght@700&family=Pacifico&display=swap');
+@import './custom.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  font-family: 'Caveat', 'Pacifico', 'Comic Sans MS', 'Comic Sans', cursive, sans-serif;
+  background-color: #fff;
+  min-height: 100vh;
+}
+
+input, button, textarea, select {
+  font-family: inherit;
+}
+
+/* Custom styles */
+.bg-peach {
+  background-color: #FFD1DC;
+}
+
+.text-pink {
+  color: #FF69B4;
+}
+
+.text-darkpink {
+  color: #FF1493;
+}
+
+.bg-pink {
+  background-color: #FF69B4;
+}
+
+.bg-darkpink {
+  background-color: #FF1493;
+}
+
+.hover\:bg-darkpink:hover {
+  background-color: #FF1493;
+}
+
+.hover\:text-darkpink:hover {
+  color: #FF1493;
+}
+
+.focus\:ring-pink:focus {
+  --tw-ring-color: #FF69B4;
+}
+
+.focus\:border-pink:focus {
+  border-color: #FF69B4;
+}
+
+/* Add smooth transitions */
+.transition-colors {
+  transition-property: background-color, border-color, color, fill, stroke;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #FFB6C1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #FF69B4;
+}
+
+/* Custom styles can be added below */ 
