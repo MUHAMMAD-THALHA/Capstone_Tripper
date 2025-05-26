@@ -1,0 +1,29 @@
+/* Custom project-wide styles for Tripy */
+
+.card {
+  border-radius: 1.25rem;
+  box-shadow: 0 4px 24px 0 rgba(255, 182, 193, 0.15), 0 1.5px 6px 0 rgba(0,0,0,0.05);
+  background: #fff0f5;
+}
+
+.font-playful {
+  font-family: 'Caveat', 'Pacifico', 'Comic Sans MS', 'Comic Sans', cursive, sans-serif;
+}
+
+.bg-peach {
+  background-color: #FFD1DC;
+}
+
+.bg-pink {
+  background-color: #FFB6C1;
+}
+
+.bg-darkpink {
+  background-color: #FF69B4;
+}
+
+.text-darkpink {
+  color: #FF69B4;
+}
+
+/* Add more custom styles as needed */ 
