@@ -1,3 +1,5 @@
+require("dotenv").config();
+
 const express = require("express");
 const bcrypt = require("bcrypt");
 const cors = require('cors');
@@ -5,7 +7,12 @@ const jwt = require("jsonwebtoken");
 const { join } = require('path');
 const { Low } = require('lowdb');
 const { JSONFile } = require('lowdb/node');
-require("dotenv").config();
+const genAI = require('./config/gemini');
+const openai = require('./config/openai');
+const AI_PROVIDER = process.env.AI_PROVIDER || "gemini";
+const axios = require('axios');
+const OLLAMA_API_URL = process.env.OLLAMA_API_URL || "http://localhost:11434";
+const OLLAMA_MODEL = process.env.OLLAMA_MODEL || "llama3";
 
 // Initialize Express app
 const app = express();
@@ -137,6 +144,189 @@ initializeDb().then(() => {
         } catch (error) {
             console.error('Check account error:', error);
             res.status(500).json({ message: "Internal server error" });
+        }
+    });
+
+    // AI Suggestions endpoint
+    app.post("/ai/suggestions", async (req, res) => {
+        const { query } = req.body;
+        try {
+            if (AI_PROVIDER === "ollama") {
+                const prompt = `Suggest 3 tours or activities related to: ${query}. Respond in JSON format as {\"suggestions\":[{\"title\":\"...\",\"description\":\"...\"}]}`;
+                const response = await axios.post(`${OLLAMA_API_URL}/api/generate`, {
+                    model: OLLAMA_MODEL,
+                    prompt: prompt,
+                    stream: false
+                });
+                const text = response.data.response;
+                const suggestions = JSON.parse(text).suggestions;
+                return res.json(suggestions);
+            } else if (AI_PROVIDER === "openai") {
+                const completion = await openai.chat.completions.create({
+                    model: "gpt-3.5-turbo",
+                    messages: [
+                        { role: "system", content: "You are a travel assistant that suggests tours and activities. Provide suggestions in JSON format with title and description fields." },
+                        { role: "user", content: `Suggest 3 tours or activities related to: ${query}` }
+                    ],
+                    response_format: { type: "json_object" }
+                });
+                const suggestions = JSON.parse(completion.choices[0].message.content).suggestions;
+                return res.json(suggestions);
+            } else {
+                const model = genAI.getGenerativeModel({ model: "models/gemini-1.5-pro-latest" });
+                const prompt = `Suggest 3 tours or activities related to: ${query}. Respond in JSON format as {\"suggestions\":[{\"title\":\"...\",\"description\":\"...\"}]}`;
+                const result = await model.generateContent(prompt);
+                const text = result.response.text();
+                const suggestions = JSON.parse(text).suggestions;
+                return res.json(suggestions);
+            }
+        } catch (error) {
+            console.error('AI suggestions error:', error);
+            res.status(500).json({ message: "Error generating suggestions" });
+        }
+    });
+
+    // AI Recommendations endpoint
+    app.post("/ai/recommendations", async (req, res) => {
+        const { query, preferences } = req.body;
+        try {
+            if (AI_PROVIDER === "ollama") {
+                const prompt = `Based on these preferences: ${JSON.stringify(preferences)}, suggest personalized travel recommendations for: ${query}. Respond in JSON format as {\"recommendations\":[{\"title\":\"...\",\"description\":\"...\"}]}`;
+                const response = await axios.post(`${OLLAMA_API_URL}/api/generate`, {
+                    model: OLLAMA_MODEL,
+                    prompt: prompt,
+                    stream: false
+                });
+                const text = response.data.response;
+                const recommendations = JSON.parse(text).recommendations;
+                return res.json(recommendations);
+            } else if (AI_PROVIDER === "openai") {
+                const completion = await openai.chat.completions.create({
+                    model: "gpt-3.5-turbo",
+                    messages: [
+                        { role: "system", content: "You are a travel assistant that provides personalized travel recommendations. Consider user preferences and provide recommendations in JSON format with title and description fields." },
+                        { role: "user", content: `Based on these preferences: ${JSON.stringify(preferences)}, suggest personalized travel recommendations for: ${query}` }
+                    ],
+                    response_format: { type: "json_object" }
+                });
+                const recommendations = JSON.parse(completion.choices[0].message.content).recommendations;
+                return res.json(recommendations);
+            } else {
+                const model = genAI.getGenerativeModel({ model: "models/gemini-1.5-pro-latest" });
+                const prompt = `Based on these preferences: ${JSON.stringify(preferences)}, suggest personalized travel recommendations for: ${query}. Respond in JSON format as {\"recommendations\":[{\"title\":\"...\",\"description\":\"...\"}]}`;
+                const result = await model.generateContent(prompt);
+                const text = result.response.text();
+                const recommendations = JSON.parse(text).recommendations;
+                return res.json(recommendations);
+            }
+        } catch (error) {
+            console.error('AI recommendations error:', error);
+            res.status(500).json({ message: "Error generating recommendations" });
+        }
+    });
+
+    // AI Destinations endpoint
+    app.post("/ai/destinations", async (req, res) => {
+        const { input } = req.body;
+        try {
+            if (AI_PROVIDER === "ollama") {
+                const prompt = `Suggest 3 destinations related to: ${input}. Respond in JSON format as {\"destinations\":[{\"name\":\"...\",\"type\":\"city|landmark|museum|park|beach|etc\"}]}`;
+                const response = await axios.post(`${OLLAMA_API_URL}/api/generate`, {
+                    model: OLLAMA_MODEL,
+                    prompt: prompt,
+                    stream: false
+                });
+                const text = response.data.response;
+                const destinations = JSON.parse(text).destinations;
+                return res.json(destinations);
+            } else if (AI_PROVIDER === "openai") {
+                const completion = await openai.chat.completions.create({
+                    model: "gpt-3.5-turbo",
+                    messages: [
+                        { role: "system", content: "You are a travel assistant that suggests destinations. Provide suggestions in JSON format with name and type fields. Types can be: city, landmark, museum, park, beach, etc." },
+                        { role: "user", content: `Suggest 3 destinations related to: ${input}` }
+                    ],
+                    response_format: { type: "json_object" }
+                });
+                const destinations = JSON.parse(completion.choices[0].message.content).destinations;
+                return res.json(destinations);
+            } else {
+                const model = genAI.getGenerativeModel({ model: "models/gemini-1.5-pro-latest" });
+                const prompt = `Suggest 3 destinations related to: ${input}. Respond in JSON format as {\"destinations\":[{\"name\":\"...\",\"type\":\"city|landmark|museum|park|beach|etc\"}]}`;
+                const result = await model.generateContent(prompt);
+                const text = result.response.text();
+                const destinations = JSON.parse(text).destinations;
+                return res.json(destinations);
+            }
+        } catch (error) {
+            console.error('AI destinations error:', error);
+            res.status(500).json({ message: "Error generating destination suggestions" });
+        }
+    });
+
+    // Test AI API endpoint
+    app.get("/ai/test", async (req, res) => {
+        try {
+            if (AI_PROVIDER === "ollama") {
+                const prompt = "Say 'API is working correctly' if you can read this message. Respond in JSON format as {\"message\":\"...\"}";
+                const response = await axios.post(`${OLLAMA_API_URL}/api/generate`, {
+                    model: OLLAMA_MODEL,
+                    prompt: prompt,
+                    stream: false
+                });
+                const text = response.data.response;
+                const message = JSON.parse(text).message;
+                return res.json({
+                    status: "success",
+                    message: message,
+                    apiKeyConfigured: true
+                });
+            } else if (AI_PROVIDER === "openai") {
+                if (!process.env.OPENAI_API_KEY) {
+                    return res.status(500).json({ 
+                        error: "OpenAI API key is not configured",
+                        message: "Please add OPENAI_API_KEY to your .env file"
+                    });
+                }
+                const completion = await openai.chat.completions.create({
+                    model: "gpt-3.5-turbo",
+                    messages: [
+                        { role: "system", content: "You are a helpful assistant." },
+                        { role: "user", content: "Say 'API is working correctly' if you can read this message. Respond in JSON format as {\"message\":\"...\"}" }
+                    ],
+                    response_format: { type: "json_object" }
+                });
+                const message = JSON.parse(completion.choices[0].message.content).message;
+                return res.json({
+                    status: "success",
+                    message: message,
+                    apiKeyConfigured: !!process.env.OPENAI_API_KEY
+                });
+            } else {
+                if (!process.env.GEMINI_API_KEY) {
+                    return res.status(500).json({ 
+                        error: "Gemini API key is not configured",
+                        message: "Please add GEMINI_API_KEY to your .env file"
+                    });
+                }
+                const model = genAI.getGenerativeModel({ model: "models/gemini-1.5-pro-latest" });
+                const prompt = "Say 'API is working correctly' if you can read this message. Respond in JSON format as {\"message\":\"...\"}";
+                const result = await model.generateContent(prompt);
+                const text = result.response.text();
+                const message = JSON.parse(text).message;
+                return res.json({
+                    status: "success",
+                    message: message,
+                    apiKeyConfigured: !!process.env.GEMINI_API_KEY
+                });
+            }
+        } catch (error) {
+            console.error('AI API test error:', error);
+            res.status(500).json({
+                error: "AI API test failed",
+                message: error.message,
+                apiKeyConfigured: AI_PROVIDER === "openai" ? !!process.env.OPENAI_API_KEY : (AI_PROVIDER === "ollama" ? true : !!process.env.GEMINI_API_KEY)
+            });
         }
     });
 
