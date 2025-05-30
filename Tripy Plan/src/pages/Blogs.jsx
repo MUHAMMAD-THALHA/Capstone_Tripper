@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { FaCalendarAlt, FaUser, FaTag, FaSearch, FaFilter } from 'react-icons/fa';
+import { FaCalendarAlt, FaUser, FaTag, FaSearch, FaFilter, FaEdit } from 'react-icons/fa';
 import { Helmet } from 'react-helmet-async';
 import { toast } from 'react-hot-toast';
 
@@ -13,6 +13,7 @@ const Blogs = () => {
     author: localStorage.getItem('userName') || 'Anonymous',
     category: 'general'
   });
+  const [editingPost, setEditingPost] = useState(null);
   const [showNewPostForm, setShowNewPostForm] = useState(false);
   const [selectedImage, setSelectedImage] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
@@ -40,7 +41,11 @@ const Blogs = () => {
       const reader = new FileReader();
       reader.onloadend = () => {
         setSelectedImage(reader.result);
-        setNewPost(prev => ({ ...prev, image: reader.result }));
+        if (editingPost) {
+          setEditingPost(prev => ({ ...prev, image: reader.result }));
+        } else {
+          setNewPost(prev => ({ ...prev, image: reader.result }));
+        }
       };
       reader.readAsDataURL(file);
     }
@@ -131,6 +136,47 @@ const Blogs = () => {
     });
     setPosts(updatedPosts);
     localStorage.setItem('blogPosts', JSON.stringify(updatedPosts));
+  };
+
+  const handleEditPost = (post) => {
+    setEditingPost({
+      ...post,
+      image: post.image || null
+    });
+    setSelectedImage(post.image || null);
+    setShowNewPostForm(false);
+  };
+
+  const handleUpdatePost = (e) => {
+    e.preventDefault();
+    
+    if (!editingPost.title || !editingPost.content) {
+      toast.error('Please fill in all required fields');
+      return;
+    }
+
+    const updatedPosts = posts.map(post => {
+      if (post.id === editingPost.id) {
+        return {
+          ...editingPost,
+          date: new Date().toISOString()
+        };
+      }
+      return post;
+    });
+
+    setPosts(updatedPosts);
+    localStorage.setItem('blogPosts', JSON.stringify(updatedPosts));
+    
+    // Reset form
+    setEditingPost(null);
+    setSelectedImage(null);
+    toast.success('Blog post updated successfully!');
+  };
+
+  const handleCancelEdit = () => {
+    setEditingPost(null);
+    setSelectedImage(null);
   };
 
   // Filter and sort posts
@@ -273,6 +319,80 @@ const Blogs = () => {
           </div>
         )}
 
+        {/* Edit Post Form */}
+        {editingPost && (
+          <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
+            <h2 className="text-xl font-bold mb-4">Edit Post</h2>
+            <form onSubmit={handleUpdatePost} className="space-y-4">
+              <div>
+                <label className="block text-gray-700 mb-2">Title</label>
+                <input
+                  type="text"
+                  value={editingPost.title}
+                  onChange={(e) => setEditingPost(prev => ({ ...prev, title: e.target.value }))}
+                  className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:border-pink"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-gray-700 mb-2">Category</label>
+                <select
+                  value={editingPost.category}
+                  onChange={(e) => setEditingPost(prev => ({ ...prev, category: e.target.value }))}
+                  className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:border-pink"
+                >
+                  {categories.filter(cat => cat !== 'all').map(category => (
+                    <option key={category} value={category}>
+                      {category.charAt(0).toUpperCase() + category.slice(1)}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-gray-700 mb-2">Content</label>
+                <textarea
+                  value={editingPost.content}
+                  onChange={(e) => setEditingPost(prev => ({ ...prev, content: e.target.value }))}
+                  rows="6"
+                  className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:border-pink"
+                  required
+                ></textarea>
+              </div>
+              <div>
+                <label className="block text-gray-700 mb-2">Image</label>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageChange}
+                  className="w-full"
+                />
+                {selectedImage && (
+                  <img
+                    src={selectedImage}
+                    alt="Preview"
+                    className="mt-2 max-h-48 rounded-lg"
+                  />
+                )}
+              </div>
+              <div className="flex gap-4">
+                <button
+                  type="submit"
+                  className="flex-1 bg-pink text-white py-2 rounded-lg hover:bg-darkpink transition-colors"
+                >
+                  Update Post
+                </button>
+                <button
+                  type="button"
+                  onClick={handleCancelEdit}
+                  className="flex-1 bg-gray-500 text-white py-2 rounded-lg hover:bg-gray-600 transition-colors"
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </div>
+        )}
+
         {/* Blog Posts */}
         <div className="space-y-8">
           {filteredAndSortedPosts.map((post) => (
@@ -292,12 +412,20 @@ const Blogs = () => {
                       {post.category}
                     </span>
                   </div>
-                  <button
-                    onClick={() => handleDeletePost(post.id)}
-                    className="text-red-500 hover:text-red-700"
-                  >
-                    Delete
-                  </button>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => handleEditPost(post)}
+                      className="text-blue-500 hover:text-blue-700"
+                    >
+                      <FaEdit className="w-5 h-5" />
+                    </button>
+                    <button
+                      onClick={() => handleDeletePost(post.id)}
+                      className="text-red-500 hover:text-red-700"
+                    >
+                      Delete
+                    </button>
+                  </div>
                 </div>
                 <p className="text-gray-600 mb-4">{post.content}</p>
                 <div className="flex justify-between items-center text-sm text-gray-500 mb-4">
