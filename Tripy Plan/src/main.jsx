@@ -22,32 +22,26 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
 import App from './App';
-import { AuthProvider } from './context/AuthContext';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { HelmetProvider } from 'react-helmet-async';
-import './index.css';
+import { Toaster } from 'react-hot-toast';
 import { ClerkProvider } from '@clerk/clerk-react';
-
-// Create a client
-const queryClient = new QueryClient();
+import './index.css';
 
 const clerkPubKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
+const queryClient = new QueryClient();
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    <QueryClientProvider client={queryClient}>
-      <ClerkProvider publishableKey={clerkPubKey}>
+    <ClerkProvider publishableKey={clerkPubKey}>
+      <QueryClientProvider client={queryClient}>
         <HelmetProvider>
-          <BrowserRouter future={{ 
-            v7_startTransition: true,
-            v7_relativeSplatPath: true
-          }}>
-            <AuthProvider>
-              <App />
-            </AuthProvider>
+          <BrowserRouter>
+            <App />
+            <Toaster position="top-center" />
           </BrowserRouter>
         </HelmetProvider>
-      </ClerkProvider>
-    </QueryClientProvider>
+      </QueryClientProvider>
+    </ClerkProvider>
   </React.StrictMode>
 );
