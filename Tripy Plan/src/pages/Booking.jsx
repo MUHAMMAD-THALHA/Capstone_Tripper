@@ -2,11 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { toast } from 'react-hot-toast';
-import { useAuth } from '../context/AuthContext';
+import { useUser, RedirectToSignIn } from '@clerk/clerk-react';
 
 const Booking = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user } = useUser();
   const [selectedPackage, setSelectedPackage] = useState(null);
   const [formData, setFormData] = useState({
     startDate: '',
@@ -26,13 +26,7 @@ const Booking = () => {
   });
 
   useEffect(() => {
-    // Check if user is logged in
-    if (!user) {
-      toast.error('Please login to book a tour');
-      navigate('/login');
-      return;
-    }
-
+    if (!user) return;
     // Get the selected package from localStorage
     const packageData = localStorage.getItem('selectedPackage');
     if (!packageData) {
@@ -99,7 +93,10 @@ const Booking = () => {
     }
   };
 
-  if (!user || !selectedPackage) {
+  if (!user) {
+    return <RedirectToSignIn />;
+  }
+  if (!selectedPackage) {
     return null; // Will redirect in useEffect
   }
 
