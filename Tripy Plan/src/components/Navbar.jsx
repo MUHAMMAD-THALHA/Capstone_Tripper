@@ -30,9 +30,9 @@ const Navbar = () => {
           <img src={Logo} alt="Tripy Logo" className="w-20 h-20 border-2 border-white rounded-full mb-2" />
         </Link>
       </div>
-      
+
       {/* Mobile menu button */}
-      <button 
+      <button
         className="md:hidden text-black text-2xl"
         onClick={toggleMenu}
       >
@@ -47,16 +47,16 @@ const Navbar = () => {
         <NavLink to="/packages" className={navLinkClass}>PACKAGES</NavLink>
         <NavLink to="/blogs" className={navLinkClass}>BLOGS</NavLink>
         <NavLink to="/help-support" className={navLinkClass}>HELP & SUPPORT</NavLink>
-        <div className="border-t border-white/20 pt-4 mt-4">
+        <div className="flex items-center gap-4">
           <SignedIn>
             <UserButton afterSignOutUrl="/" />
           </SignedIn>
           <SignedOut>
             <SignInButton afterSignInUrl="/" mode="modal">
-              <button className="flex items-center gap-2 hover:bg-pink-100 p-2 rounded-lg text-black font-bold drop-shadow-lg focus:bg-pink-400 focus:text-white focus:shadow-lg focus:shadow-pink-200/60 active:bg-pink-400 active:text-white active:shadow-lg active:shadow-pink-200/60 transition-all">LOGIN</button>
+              <button className="px-4 py-2 text-black font-bold hover:bg-pink-100 rounded-lg transition-all drop-shadow-sm">LOGIN</button>
             </SignInButton>
             <SignUpButton afterSignUpUrl="/profile" mode="modal">
-              <button className="flex items-center gap-2 hover:bg-pink-100 p-2 rounded-lg text-black font-bold drop-shadow-lg focus:bg-pink-400 focus:text-white focus:shadow-lg focus:shadow-pink-200/60 active:bg-pink-400 active:text-white active:shadow-lg active:shadow-pink-200/60 transition-all">SIGN UP</button>
+              <button className="px-4 py-2 bg-pink-400 text-white font-bold rounded-lg hover:bg-pink-500 transition-all shadow-md">SIGN UP</button>
             </SignUpButton>
           </SignedOut>
         </div>
@@ -76,59 +76,61 @@ const Navbar = () => {
             </button>
           </div>
           <nav className="flex flex-col space-y-4 text-lg font-bold">
-            <NavLink 
-              to="/" 
+            <NavLink
+              to="/"
               className={navLinkClass}
               onClick={toggleMenu}
             >
               HOME
             </NavLink>
-            <NavLink 
-              to="/about" 
+            <NavLink
+              to="/about"
               className={navLinkClass}
               onClick={toggleMenu}
             >
               ABOUT US
             </NavLink>
-            <NavLink 
-              to="/tours" 
+            <NavLink
+              to="/tours"
               className={navLinkClass}
               onClick={toggleMenu}
             >
               TOURS
             </NavLink>
-            <NavLink 
-              to="/packages" 
+            <NavLink
+              to="/packages"
               className={navLinkClass}
               onClick={toggleMenu}
             >
               PACKAGES
             </NavLink>
-            <NavLink 
-              to="/blogs" 
+            <NavLink
+              to="/blogs"
               className={navLinkClass}
               onClick={toggleMenu}
             >
               BLOGS
             </NavLink>
-            <NavLink 
-              to="/help-support" 
+            <NavLink
+              to="/help-support"
               className={navLinkClass}
               onClick={toggleMenu}
             >
               HELP & SUPPORT
             </NavLink>
 
-            <div className="border-t border-white/20 pt-4 mt-4">
+            <div className="flex flex-col gap-3 pt-4 border-t border-white/20">
               <SignedIn>
-                <UserButton afterSignOutUrl="/" />
+                <div className="flex justify-center">
+                  <UserButton afterSignOutUrl="/" />
+                </div>
               </SignedIn>
               <SignedOut>
                 <SignInButton afterSignInUrl="/" mode="modal">
-                  <button className="flex items-center gap-2 hover:bg-pink-100 p-2 rounded-lg text-black font-bold drop-shadow-lg focus:bg-pink-400 focus:text-white focus:shadow-lg focus:shadow-pink-200/60 active:bg-pink-400 active:text-white active:shadow-lg active:shadow-pink-200/60 transition-all">LOGIN</button>
+                  <button onClick={toggleMenu} className="w-full px-4 py-3 text-white font-bold hover:bg-white/10 rounded-xl transition-all border border-white/30">LOGIN</button>
                 </SignInButton>
                 <SignUpButton afterSignUpUrl="/profile" mode="modal">
-                  <button className="flex items-center gap-2 hover:bg-pink-100 p-2 rounded-lg text-black font-bold drop-shadow-lg focus:bg-pink-400 focus:text-white focus:shadow-lg focus:shadow-pink-200/60 active:bg-pink-400 active:text-white active:shadow-lg active:shadow-pink-200/60 transition-all">SIGN UP</button>
+                  <button onClick={toggleMenu} className="w-full px-4 py-3 bg-pink-500 text-white font-bold rounded-xl hover:bg-pink-600 transition-all shadow-lg">SIGN UP</button>
                 </SignUpButton>
               </SignedOut>
             </div>
@@ -139,5 +141,5 @@ const Navbar = () => {
   );
 };
 
-export default Navbar; 
- 
+export default Navbar;
+

@@ -14,6 +14,7 @@ import Feedback from './pages/Feedback';
 import Booking from './pages/Booking';
 import BookedTours from './pages/BookedTours';
 import Dashboard from './pages/Dashboard';
+import OtpVerification from './pages/OtpVerification';
 import LandingPage from './components/LandingPage';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
@@ -39,12 +40,54 @@ const MainLayout = () => (
   </div>
 );
 
+// Auth Layout for centering Clerk components with background
+const AuthLayout = () => (
+  <div className="min-h-screen w-full flex items-center justify-center relative bg-peach bg-cover bg-center">
+    <div className="absolute inset-0 bg-black/40 z-0" />
+    <div className="relative z-10 w-full flex justify-center p-4">
+      <Outlet />
+    </div>
+  </div>
+);
+
 const App = () => {
   return (
     <Routes>
-      {/* Clerk Auth Routes (no Navbar/Footer) */}
-      <Route path="/sign-in" element={<SignIn routing="path" path="/sign-in" />} />
-      <Route path="/sign-up" element={<SignUp routing="path" path="/sign-up" />} />
+      {/* Clerk Auth Routes with centered layout and background */}
+      <Route element={<AuthLayout />}>
+        <Route
+          path="/sign-in"
+          element={
+            <SignIn
+              routing="path"
+              path="/sign-in"
+              appearance={{
+                elements: {
+                  formButtonPrimary: 'bg-pink-600 hover:bg-pink-700',
+                  footerActionLink: 'text-pink-600 hover:text-pink-700'
+                }
+              }}
+            />
+          }
+        />
+        <Route
+          path="/sign-up"
+          element={
+            <SignUp
+              routing="path"
+              path="/sign-up"
+              appearance={{
+                elements: {
+                  formButtonPrimary: 'bg-pink-600 hover:bg-pink-700',
+                  footerActionLink: 'text-pink-600 hover:text-pink-700'
+                }
+              }}
+            />
+          }
+        />
+      </Route>
+      {/* Phone OTP Verification (no Navbar/Footer) */}
+      <Route path="/verify-phone" element={<OtpVerification />} />
       {/* LandingPage (no Navbar/Footer) */}
       <Route path="/" element={<LandingPage />} />
       {/* All other routes with Navbar and Footer */}

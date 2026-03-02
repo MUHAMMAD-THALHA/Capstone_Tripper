@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import Logo from '../images/Logo.png';
-import { SignedIn, SignedOut } from '@clerk/clerk-react';
+import { SignedIn, SignedOut, SignUpButton } from '@clerk/clerk-react';
 import Navbar from './Navbar';
 import { Link } from 'react-router-dom';
 
@@ -66,14 +66,15 @@ const LandingPage = () => {
           Your Adventure Starts Here
         </motion.p>
         <SignedOut>
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            className="bg-pink-600 hover:bg-pink-700 text-white font-bold py-3 px-10 rounded-full text-xl shadow-lg transition-colors mt-2"
-            onClick={() => window.location.href = '/sign-in'}
-          >
-            Get Started
-          </motion.button>
+          <SignUpButton mode="modal" afterSignUpUrl="/profile">
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className="bg-pink-600 hover:bg-pink-700 text-white font-bold py-3 px-10 rounded-full text-xl shadow-lg transition-colors mt-2"
+            >
+              Get Started
+            </motion.button>
+          </SignUpButton>
         </SignedOut>
       </div>
       {/* Footer links at the bottom of the video for signed-in users */}

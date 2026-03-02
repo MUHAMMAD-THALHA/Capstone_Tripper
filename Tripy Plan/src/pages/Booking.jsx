@@ -3,11 +3,14 @@ import { useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { toast } from 'react-hot-toast';
 import { useUser, RedirectToSignIn } from '@clerk/clerk-react';
+import { FaCheckCircle, FaShieldAlt } from 'react-icons/fa';
 
 const Booking = () => {
   const navigate = useNavigate();
   const { user } = useUser();
   const [selectedPackage, setSelectedPackage] = useState(null);
+  const isPhoneVerified = sessionStorage.getItem('phoneVerified') === 'true';
+  const verifiedPhone = sessionStorage.getItem('verifiedPhone') || '';
   const [formData, setFormData] = useState({
     startDate: '',
     numberOfPeople: 1,
@@ -39,7 +42,7 @@ const Booking = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    
+
     // Calculate end date based on duration
     const startDate = new Date(formData.startDate);
     const duration = parseInt(selectedPackage.duration);
@@ -302,11 +305,48 @@ const Booking = () => {
               ></textarea>
             </div>
 
+            {/* Phone Verification Status */}
+            <div className={`mb-6 p-4 rounded-xl border-2 flex items-center justify-between gap-4 ${isPhoneVerified
+                ? 'bg-green-50 border-green-200'
+                : 'bg-amber-50 border-amber-200'
+              }`}>
+              <div className="flex items-center gap-3">
+                {isPhoneVerified ? (
+                  <FaCheckCircle className="text-green-500 text-xl flex-shrink-0" />
+                ) : (
+                  <FaShieldAlt className="text-amber-500 text-xl flex-shrink-0" />
+                )}
+                <div>
+                  <p className={`font-bold text-sm ${isPhoneVerified ? 'text-green-700' : 'text-amber-700'}`}>
+                    {isPhoneVerified ? 'Phone Verified' : 'Phone Verification Required'}
+                  </p>
+                  <p className="text-xs text-gray-500">
+                    {isPhoneVerified
+                      ? `Verified: ${verifiedPhone}`
+                      : 'Please verify your phone number before booking'}
+                  </p>
+                </div>
+              </div>
+              {!isPhoneVerified && (
+                <button
+                  type="button"
+                  onClick={() => navigate('/verify-phone', { state: { redirectTo: '/booking' } })}
+                  className="px-4 py-2 bg-gradient-to-r from-pink-500 to-orange-400 text-white text-sm font-bold rounded-lg hover:shadow-lg transition-all whitespace-nowrap"
+                >
+                  Verify Now
+                </button>
+              )}
+            </div>
+
             <button
               type="submit"
-              className="w-full bg-pink text-white py-3 rounded-lg hover:bg-darkpink transition-colors"
+              disabled={!isPhoneVerified}
+              className={`w-full py-3 rounded-lg transition-colors ${isPhoneVerified
+                  ? 'bg-pink text-white hover:bg-darkpink'
+                  : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                }`}
             >
-              Proceed to Payment
+              {isPhoneVerified ? 'Proceed to Payment' : 'Verify Phone to Continue'}
             </button>
           </form>
         </div>
