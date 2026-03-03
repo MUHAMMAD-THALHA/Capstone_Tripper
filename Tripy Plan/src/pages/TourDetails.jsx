@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { FaMapMarkerAlt, FaClock, FaStar, FaCalendarAlt, FaUsers, FaTag, FaCar, FaUtensils, FaCheck } from 'react-icons/fa';
 import { toursAPI } from '../services/api';
 import { useQuery } from '@tanstack/react-query';
+import { useUser, SignInButton } from '@clerk/clerk-react';
 import { Helmet } from 'react-helmet-async';
 import { toast } from 'react-hot-toast';
 
@@ -23,25 +24,24 @@ const GoogleMap = ({ coordinates, title }) => {
 
 const TransportOptions = ({ options, onSelect }) => {
   const [selectedOption, setSelectedOption] = useState(null);
-  
+
   const handleSelect = (option) => {
     setSelectedOption(option);
     onSelect(option);
   };
-  
+
   return (
     <div className="mt-6">
       <h3 className="text-xl font-bold text-pink mb-3">Transportation Options</h3>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {options.map((option, index) => (
-          <div 
+          <div
             key={index}
             onClick={() => handleSelect(option)}
-            className={`p-4 rounded-lg border-2 cursor-pointer transition-all ${
-              selectedOption === option 
-                ? 'border-pink bg-pink/10' 
-                : 'border-gray-200 hover:border-pink/50'
-            }`}
+            className={`p-4 rounded-lg border-2 cursor-pointer transition-all ${selectedOption === option
+              ? 'border-pink bg-pink/10'
+              : 'border-gray-200 hover:border-pink/50'
+              }`}
           >
             <div className="flex items-center justify-between mb-2">
               <span className="font-bold">{option.mode}</span>
@@ -81,10 +81,10 @@ const RestaurantOptions = ({ restaurants, tourId }) => {
     type: 'dine-in'
   });
   const [showBookingForm, setShowBookingForm] = useState(false);
-  
+
   const handleBookingSubmit = (e) => {
     e.preventDefault();
-    
+
     toast.promise(
       toursAPI.bookRestaurant(tourId, selectedRestaurant.id, {
         ...bookingDetails,
@@ -96,10 +96,10 @@ const RestaurantOptions = ({ restaurants, tourId }) => {
         error: 'Failed to book restaurant'
       }
     );
-    
+
     setShowBookingForm(false);
   };
-  
+
   return (
     <div className="mt-8">
       <h3 className="text-xl font-bold text-pink mb-3">Nearby Restaurants</h3>
@@ -107,8 +107,8 @@ const RestaurantOptions = ({ restaurants, tourId }) => {
         {restaurants.map((restaurant) => (
           <div key={restaurant.id} className="bg-white rounded-lg shadow-md overflow-hidden">
             <div className="h-40 overflow-hidden">
-              <img 
-                src={restaurant.image} 
+              <img
+                src={restaurant.image}
                 alt={restaurant.name}
                 className="w-full h-full object-cover"
               />
@@ -149,7 +149,7 @@ const RestaurantOptions = ({ restaurants, tourId }) => {
           </div>
         ))}
       </div>
-      
+
       {showBookingForm && selectedRestaurant && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="bg-white rounded-xl p-6 max-w-md w-full">
@@ -160,23 +160,23 @@ const RestaurantOptions = ({ restaurants, tourId }) => {
                 <input
                   type="date"
                   value={bookingDetails.date}
-                  onChange={(e) => setBookingDetails({...bookingDetails, date: e.target.value})}
+                  onChange={(e) => setBookingDetails({ ...bookingDetails, date: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-pink"
                   required
                 />
               </div>
-              
+
               <div className="mb-4">
                 <label className="block text-gray-700 mb-1">Time</label>
                 <input
                   type="time"
                   value={bookingDetails.time}
-                  onChange={(e) => setBookingDetails({...bookingDetails, time: e.target.value})}
+                  onChange={(e) => setBookingDetails({ ...bookingDetails, time: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-pink"
                   required
                 />
               </div>
-              
+
               <div className="mb-4">
                 <label className="block text-gray-700 mb-1">Number of People</label>
                 <input
@@ -184,24 +184,24 @@ const RestaurantOptions = ({ restaurants, tourId }) => {
                   min="1"
                   max="10"
                   value={bookingDetails.people}
-                  onChange={(e) => setBookingDetails({...bookingDetails, people: parseInt(e.target.value)})}
+                  onChange={(e) => setBookingDetails({ ...bookingDetails, people: parseInt(e.target.value) })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-pink"
                   required
                 />
               </div>
-              
+
               <div className="mb-6">
                 <label className="block text-gray-700 mb-1">Booking Type</label>
                 <select
                   value={bookingDetails.type}
-                  onChange={(e) => setBookingDetails({...bookingDetails, type: e.target.value})}
+                  onChange={(e) => setBookingDetails({ ...bookingDetails, type: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-pink"
                 >
                   {selectedRestaurant.dineIn && <option value="dine-in">Dine-in</option>}
                   {selectedRestaurant.takeaway && <option value="takeaway">Takeaway</option>}
                 </select>
               </div>
-              
+
               <div className="flex gap-3">
                 <button
                   type="button"
@@ -228,6 +228,7 @@ const RestaurantOptions = ({ restaurants, tourId }) => {
 const TourDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { isSignedIn, user } = useUser();
   const [transportOption, setTransportOption] = useState(null);
 
   const { data: tour, isLoading, error } = useQuery({
@@ -280,15 +281,19 @@ const TourDetails = () => {
   }
 
   const handleBookNow = async () => {
+    if (!isSignedIn) {
+      toast.error('Please sign in to book this tour');
+      // The BookingGuard on /booking will handle the modal/redirect
+      navigate('/booking', { state: { tourId: id, transport: transportOption?.mode } });
+      return;
+    }
+
     try {
-      await toursAPI.create({ 
-        tourId: id,
-        transport: transportOption ? transportOption.mode : null
-      });
-      toast.success('Tour booked successfully!');
+      // Store the full tour data under 'selectedPackage' so Booking.jsx can render it
+      localStorage.setItem('selectedPackage', JSON.stringify(tour));
       navigate('/booking');
     } catch (error) {
-      toast.error('Failed to book tour. Please try again.');
+      toast.error('Failed to initiate booking');
     }
   };
 
@@ -298,7 +303,7 @@ const TourDetails = () => {
         <title>{`${tour.title} - Tripy Plan`}</title>
         <meta name="description" content={tour.description} />
       </Helmet>
-      
+
       <div className="min-h-screen bg-peach flex flex-col items-center py-10">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -314,7 +319,7 @@ const TourDetails = () => {
               loading="lazy"
             />
           </div>
-          
+
           <div className="flex flex-col md:flex-row w-full justify-between items-center mb-4 gap-4">
             <h1 className="text-3xl md:text-4xl font-extrabold text-pink mb-2 md:mb-0">{tour.title}</h1>
             <div className="flex items-center gap-3">
@@ -347,21 +352,21 @@ const TourDetails = () => {
                 <li key={i} role="listitem">{h}</li>
               ))}
             </ul>
-            
+
             {/* Google Maps Integration */}
             <h3 className="text-xl font-bold text-pink mb-3">Location</h3>
             <GoogleMap coordinates={tour.coordinates} title={tour.title} />
-            
+
             {/* Transportation Options */}
-            <TransportOptions 
-              options={tour.transportOptions} 
-              onSelect={setTransportOption} 
+            <TransportOptions
+              options={tour.transportOptions}
+              onSelect={setTransportOption}
             />
-            
+
             {/* Restaurant Options */}
-            <RestaurantOptions 
-              restaurants={tour.restaurants} 
-              tourId={tour.id} 
+            <RestaurantOptions
+              restaurants={tour.restaurants}
+              tourId={tour.id}
             />
           </div>
 
