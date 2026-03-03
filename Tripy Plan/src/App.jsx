@@ -1,5 +1,5 @@
 import React from 'react';
-import { Routes, Route, Navigate, Outlet } from 'react-router-dom';
+import { Routes, Route, Navigate, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import Home from './pages/Home';
 import Blogs from './pages/Blogs';
@@ -25,8 +25,44 @@ import {
   UserProfile,
   SignedIn,
   SignedOut,
-  RedirectToSignIn
+  RedirectToSignIn,
+  useUser,
+  SignInButton
 } from '@clerk/clerk-react';
+
+// Booking Guard for protecting pages that require Auth + Phone Verification
+const BookingGuard = ({ children }) => {
+  const { isLoaded, isSignedIn, user } = useUser();
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  if (!isLoaded) return null;
+
+  if (!isSignedIn) {
+    return (
+      <div className="flex flex-col items-center justify-center p-8 text-center bg-white rounded-2xl shadow-lg border border-pink-100">
+        <h2 className="text-2xl font-bold text-darkpink mb-4">Sign In Required</h2>
+        <p className="text-gray-600 mb-6">Please sign in to continue with your booking.</p>
+        <SignInButton mode="modal">
+          <button className="bg-pink-600 hover:bg-pink-700 text-white font-bold py-3 px-10 rounded-full text-xl shadow-lg transition-all">
+            Sign In Now
+          </button>
+        </SignInButton>
+      </div>
+    );
+  }
+
+  // Check if phone is verified via Clerk metadata or session
+  const isPhoneVerified =
+    user.phoneNumbers?.some(p => p.verification?.status === 'verified') ||
+    sessionStorage.getItem('phoneVerified') === 'true';
+
+  if (!isPhoneVerified) {
+    return <Navigate to="/verify-phone" state={{ from: location }} replace />;
+  }
+
+  return children || <Outlet />;
+};
 
 // Layout wrapper for pages with Navbar and Footer
 const MainLayout = () => (
@@ -92,11 +128,14 @@ const App = () => {
       <Route path="/" element={<LandingPage />} />
       {/* All other routes with Navbar and Footer */}
       <Route element={<MainLayout />}>
+        {/* Protected Profile */}
         <Route path="/profile" element={
           <SignedIn>
             <UserProfile />
           </SignedIn>
         } />
+
+        {/* Public Information Routes */}
         <Route path="/about" element={<About />} />
         <Route path="/tours" element={<Tours />} />
         <Route path="/packages" element={<Packages />} />
@@ -105,10 +144,14 @@ const App = () => {
         <Route path="/privacy" element={<Privacy />} />
         <Route path="/booking-policies" element={<BookingPolicies />} />
         <Route path="/feedback" element={<Feedback />} />
-        <Route path="/booking" element={<Booking />} />
-        <Route path="/booked-tours" element={<BookedTours />} />
-        <Route path="/dashboard" element={<Dashboard />} />
-        {/* Add other routes here as needed */}
+        <Route path="/tours/:id" element={<TourDetails />} />
+
+        {/* Booking-Protected Routes */}
+        <Route element={<BookingGuard />}>
+          <Route path="/booking" element={<Booking />} />
+          <Route path="/booked-tours" element={<BookedTours />} />
+          <Route path="/dashboard" element={<Dashboard />} />
+        </Route>
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

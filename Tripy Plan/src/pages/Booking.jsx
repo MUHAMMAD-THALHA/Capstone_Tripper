@@ -9,8 +9,15 @@ const Booking = () => {
   const navigate = useNavigate();
   const { user } = useUser();
   const [selectedPackage, setSelectedPackage] = useState(null);
-  const isPhoneVerified = sessionStorage.getItem('phoneVerified') === 'true';
-  const verifiedPhone = sessionStorage.getItem('verifiedPhone') || '';
+
+  // Sync verification logic with BookingGuard in App.jsx
+  const isPhoneVerified =
+    user?.phoneNumbers?.some(p => p.verification?.status === 'verified') ||
+    sessionStorage.getItem('phoneVerified') === 'true';
+
+  const verifiedPhone =
+    user?.phoneNumbers?.find(p => p.verification?.status === 'verified')?.phoneNumber ||
+    sessionStorage.getItem('verifiedPhone') || '';
   const [formData, setFormData] = useState({
     startDate: '',
     numberOfPeople: 1,
@@ -307,8 +314,8 @@ const Booking = () => {
 
             {/* Phone Verification Status */}
             <div className={`mb-6 p-4 rounded-xl border-2 flex items-center justify-between gap-4 ${isPhoneVerified
-                ? 'bg-green-50 border-green-200'
-                : 'bg-amber-50 border-amber-200'
+              ? 'bg-green-50 border-green-200'
+              : 'bg-amber-50 border-amber-200'
               }`}>
               <div className="flex items-center gap-3">
                 {isPhoneVerified ? (
@@ -342,8 +349,8 @@ const Booking = () => {
               type="submit"
               disabled={!isPhoneVerified}
               className={`w-full py-3 rounded-lg transition-colors ${isPhoneVerified
-                  ? 'bg-pink text-white hover:bg-darkpink'
-                  : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                ? 'bg-pink text-white hover:bg-darkpink'
+                : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                 }`}
             >
               {isPhoneVerified ? 'Proceed to Payment' : 'Verify Phone to Continue'}

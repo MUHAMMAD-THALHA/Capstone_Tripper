@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import Logo from '../images/Logo.png';
 import { SignedIn, SignedOut, SignUpButton } from '@clerk/clerk-react';
 import Navbar from './Navbar';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 const FooterLinks = () => (
   <div className="w-full flex flex-col items-center justify-center absolute bottom-8 left-0 z-30">
@@ -19,6 +19,7 @@ const FooterLinks = () => (
 );
 
 const LandingPage = () => {
+  const navigate = useNavigate();
   return (
     <div className="min-h-screen w-full flex items-center justify-center relative bg-black overflow-hidden">
       {/* Animated Tourist Video Background */}
@@ -70,12 +71,22 @@ const LandingPage = () => {
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              className="bg-pink-600 hover:bg-pink-700 text-white font-bold py-3 px-10 rounded-full text-xl shadow-lg transition-colors mt-2"
+              className="bg-pink-600 hover:bg-pink-700 text-white font-bold py-3 px-10 rounded-full text-xl shadow-lg transition-all mt-2"
             >
               Get Started
             </motion.button>
           </SignUpButton>
         </SignedOut>
+        <SignedIn>
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            className="bg-pink-600 hover:bg-pink-700 text-white font-bold py-3 px-10 rounded-full text-xl shadow-lg transition-all mt-2"
+            onClick={() => navigate('/tours')}
+          >
+            Explore Our Tours
+          </motion.button>
+        </SignedIn>
       </div>
       {/* Footer links at the bottom of the video for signed-in users */}
       <SignedIn>

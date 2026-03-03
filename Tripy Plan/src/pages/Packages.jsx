@@ -2,6 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { toast } from 'react-hot-toast';
+import { useUser, SignInButton } from '@clerk/clerk-react';
 import { packages } from '../data/packages';
 import { FaCalendarAlt, FaGem, FaMoneyBillWave, FaTag } from 'react-icons/fa';
 import Logo from '../images/Logo.png';
@@ -9,21 +10,14 @@ import Logo from '../images/Logo.png';
 const Packages = () => {
   const navigate = useNavigate();
 
-  const handleBooking = (packageId) => {
-    // In a real app, you would check if the user is logged in
-    const isLoggedIn = localStorage.getItem('user');
-    
-    if (!isLoggedIn) {
-      toast.error('Please login to book a package');
-      navigate('/login');
-      return;
-    }
+  const { isSignedIn } = useUser();
 
-    // Store the selected package in localStorage
+  const handleBooking = (packageId) => {
+    // Store the selected package in localStorage for the booking page to consume
     const selectedPackage = packages.find(pkg => pkg.id === packageId);
     localStorage.setItem('selectedPackage', JSON.stringify(selectedPackage));
-    
-    // Navigate to booking page
+
+    // Navigate to booking page - App.jsx BookingGuard will handle Auth/OTP
     navigate('/booking');
   };
 
@@ -35,7 +29,7 @@ const Packages = () => {
       <div className="max-w-6xl mx-auto px-4 py-10">
         <h1 className="text-3xl md:text-5xl font-bold text-center pt-4 pb-8 text-darkpink">Special Tour Packages</h1>
         <p className="text-center text-lg mb-12 max-w-3xl mx-auto">Choose from our carefully curated packages designed to give you the perfect vacation experience. Save money and enjoy more with our all-inclusive options.</p>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-10 mb-12">
           {packages.map((pkg) => (
             <div key={pkg.id} className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300">
@@ -50,10 +44,10 @@ const Packages = () => {
                   <h2 className="text-2xl font-bold text-white">{pkg.title}</h2>
                 </div>
               </div>
-              
+
               <div className="p-6">
                 <p className="text-gray-600 mb-4">{pkg.description}</p>
-                
+
                 <div className="flex flex-wrap gap-3 mb-4">
                   <div className="flex items-center gap-1 bg-peach text-darkpink px-3 py-1 rounded-full text-sm">
                     <FaCalendarAlt /> {pkg.duration}
@@ -62,20 +56,20 @@ const Packages = () => {
                     <FaGem /> {pkg.popularity} Demand
                   </div>
                 </div>
-                
+
                 <h3 className="font-bold text-lg mb-2">Package Includes:</h3>
                 <ul className="list-disc pl-5 mb-6 text-gray-600">
                   {pkg.inclusions.map((inclusion, idx) => (
                     <li key={idx}>{inclusion}</li>
                   ))}
                 </ul>
-                
+
                 <div className="flex items-center justify-between">
                   <div className="text-darkpink font-bold text-2xl">
                     ${pkg.price}
                     {pkg.discount > 0 && (
                       <span className="text-gray-400 line-through text-sm ml-2">
-                        ${Math.round(pkg.price * (1 + pkg.discount/100))}
+                        ${Math.round(pkg.price * (1 + pkg.discount / 100))}
                       </span>
                     )}
                   </div>
@@ -90,7 +84,7 @@ const Packages = () => {
             </div>
           ))}
         </div>
-        
+
         {/* About Us Section */}
         <div className="bg-white rounded-2xl shadow-lg mx-auto p-8 mb-12">
           <h2 className="text-2xl font-bold text-center mb-4 bg-darkpink text-white rounded-lg inline-block px-8 py-2">About Our Packages</h2>
@@ -101,8 +95,8 @@ const Packages = () => {
             </div>
             <div className="flex-1">
               <blockquote className="text-md md:text-lg text-gray-700 text-center md:text-left">
-                "Our packages are designed with love and care to provide you with the best travel experience. We believe in creating memorable journeys that last a lifetime."<br/><br/>
-                Every package is carefully curated to include the perfect balance of adventure, relaxation, and cultural experiences. We handle all the details so you can focus on making memories.<br/><br/>
+                "Our packages are designed with love and care to provide you with the best travel experience. We believe in creating memorable journeys that last a lifetime."<br /><br />
+                Every package is carefully curated to include the perfect balance of adventure, relaxation, and cultural experiences. We handle all the details so you can focus on making memories.<br /><br />
                 Join us for an unforgettable journey and let us take care of everything!
               </blockquote>
             </div>
