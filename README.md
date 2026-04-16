@@ -44,6 +44,6 @@ Mobile:
  * React Native: JavaScript-based framework for building native mobile apps.
 
 
-Deployed Backend server : https://tripper-backend-2993.onrender.com/
-Deployed Frontend Server : https://tripper-n7io.onrender.com/
+Deployed Backend server : https://capstone-tripper-1.onrender.com
+Deployed Frontend Server : https://capstone-tripper-li9t.onrender.com
 \\--------------------------------------------------T H E - E N D-----------------------------------------------\\
